@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import services.AmazonClient;
 
 @RestController
-@RequestMapping("/storage/")
+@RequestMapping("/storage")
 public class BucketController {
 	
 	private AmazonClient amazonClient;
@@ -23,6 +23,7 @@ public class BucketController {
 
     @PostMapping("/uploadFile")
     public String uploadFile(@RequestPart(value = "file") MultipartFile file) {
+    	System.out.println("received request");
         return this.amazonClient.uploadFile(file);
     }
 
