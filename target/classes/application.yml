@@ -3,4 +3,4 @@ server:
 
 spring:
   application:
-      name: rom-s3-service
+      name: rpm-s3-service
