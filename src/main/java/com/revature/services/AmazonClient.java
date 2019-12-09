@@ -22,10 +22,13 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectId;
 
 @Service
 public class AmazonClient {
@@ -111,8 +114,15 @@ public class AmazonClient {
             // Set the presigned URL to expire after one hour.
             java.util.Date expiration = new java.util.Date();
             long expTimeMillis = expiration.getTime();
-            expTimeMillis += 1000 * 60 * 60;
+            expTimeMillis += 1000 * 30;
+//            expTimeMillis += 1000 * 60 * 60;
             expiration.setTime(expTimeMillis);
+            
+            // Getting the object key for url generation
+            
+            S3ObjectId objectId = new S3ObjectId(bucketName, object);
+            GetObjectRequest objectRequest = new GetObjectRequest(objectId);
+            System.out.println(s3Client.getObject(objectRequest).getKey());
 
             // Generate the presigned URL.
             System.out.println("Generating pre-signed URL.");

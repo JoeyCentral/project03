@@ -25,7 +25,7 @@ public class BucketController {
         this.amazonClient = amazonClient;
     }
 
-    @PostMapping
+    @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public String uploadFile(HttpEntity<byte[]> requestEntity) {
         return this.amazonClient.uploadPhoto(requestEntity.getBody());
@@ -38,6 +38,7 @@ public class BucketController {
     
     @PostMapping("/url/{object}")
     public String getPreSignedUrl(@PathVariable String object) throws IOException {
+    	System.out.println("presign request received");
     	return amazonClient.getPreSignedUrl(object);
     }
 	
