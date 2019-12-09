@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
@@ -21,14 +20,15 @@ import com.amazonaws.HttpMethod;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectId;
 
 @Service
 public class AmazonClient {
@@ -102,34 +102,11 @@ public class AmazonClient {
 		}
 	}
 
-	/*
-	 * Also you can upload the same file many times, so we should generate unique
-	 * name for each of them. Let’s use a timestamp and also replace all spaces in
-	 * filename with underscores to avoid issues in future.
-	 * 
-	 */
-	private String generateFileName(MultipartFile multiPart) {
-		return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
-	}
-
-	/*
-	 * method which uploads file to S3 bucket.
-	 */
-	private void uploadFileTos3bucket(String fileName, File file) {
-		s3Client.putObject(new PutObjectRequest(bucketName, fileName, file));
-	}
-
 	public String deleteFileFromS3Bucket(String fileUrl) {
 		String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
 		s3Client.deleteObject(new DeleteObjectRequest(bucketName + "/", fileName));
 		return "Successfully deleted";
 	}
-	
-	/*
-	 * The following example generates a presigned URL that you can give to others 
-	 * so that they can retrieve an object from an S3 bucket. For more information
-	 * 
-	 */
 	
 	public String getPreSignedUrl(String object) throws IOException {
 
@@ -137,8 +114,15 @@ public class AmazonClient {
             // Set the presigned URL to expire after one hour.
             java.util.Date expiration = new java.util.Date();
             long expTimeMillis = expiration.getTime();
-            expTimeMillis += 1000 * 60 * 60;
+            expTimeMillis += 1000 * 30;
+//            expTimeMillis += 1000 * 60 * 60;
             expiration.setTime(expTimeMillis);
+            
+            // Getting the object key for url generation
+            
+            S3ObjectId objectId = new S3ObjectId(bucketName, object);
+            GetObjectRequest objectRequest = new GetObjectRequest(objectId);
+            System.out.println(s3Client.getObject(objectRequest).getKey());
 
             // Generate the presigned URL.
             System.out.println("Generating pre-signed URL.");
@@ -161,4 +145,5 @@ public class AmazonClient {
             return null;
         }
     }
+	
 }
