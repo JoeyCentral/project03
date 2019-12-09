@@ -1,8 +1,12 @@
-package services;
+package com.revature.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
@@ -12,11 +16,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
 @Service
@@ -65,19 +74,30 @@ public class AmazonClient {
 	 * it’s a profile image etc.
 	 */
 
-	public String uploadFile(MultipartFile multipartFile) {
-
-		String fileUrl = "";
+	public String uploadPhoto(byte[] contents) {
 		try {
-			File file = convertMultiPartToFile(multipartFile);
-			String fileName = generateFileName(multipartFile);
-			fileUrl = endpointUrl + "/" + bucketName + "/" + fileName;
-			uploadFileTos3bucket(fileName, file);
-			file.delete();
-		} catch (Exception e) {
+			InputStream stream = new ByteArrayInputStream(contents);
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentLength(contents.length);
+			metadata.setContentType("image/png");
+			String fileName = (LocalDateTime.now()).toString();
+			PutObjectRequest s3Put = new PutObjectRequest(bucketName, fileName, stream, metadata);
+			s3Client.putObject(s3Put);
+
+			URL url = s3Client.getUrl(bucketName, fileName);
+			return url.toString();
+
+		} catch (AmazonServiceException e) {
+			// The call was transmitted successfully, but Amazon S3 couldn't process
+			// it, so it returned an error response.
 			e.printStackTrace();
+			return null;
+		} catch (SdkClientException e) {
+			// Amazon S3 couldn't be contacted for a response, or the client
+			// couldn't parse the response from Amazon S3.
+			e.printStackTrace();
+			return null;
 		}
-		return fileUrl;
 	}
 
 	/*

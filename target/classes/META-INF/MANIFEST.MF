@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Implementation-Title: rpm-auth-service
+Implementation-Title: rpm-s3-service
 Implementation-Version: 0.0.1-SNAPSHOT
 Built-By: cscho
 Implementation-Vendor-Id: com.revature

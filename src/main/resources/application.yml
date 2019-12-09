@@ -1,0 +1,6 @@
+server:
+  port: 5000
+
+spring:
+  application:
+      name: rom-s3-service
