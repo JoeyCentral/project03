@@ -57,8 +57,8 @@ public class AmazonClient {
 	}
 
 	/*
-	 * S3 bucket uploading method requires File as a parameter, but we have
-	 * MultipartFile, so we need to add method which can make this convertion.
+	 * Because of uploading method required multipart file as a parameter, 
+	 * The following method provide that requirement.
 	 * 
 	 */
 
@@ -101,12 +101,21 @@ public class AmazonClient {
 			return null;
 		}
 	}
+	
+	// The Following method Used for deleting an object from S3 Bucket.
 
 	public String deleteFileFromS3Bucket(String fileUrl) {
 		String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
 		s3Client.deleteObject(new DeleteObjectRequest(bucketName + "/", fileName));
 		return "Successfully deleted";
 	}
+	
+	/*
+	 * 
+	 *  The following method Provide Take object and generate pre-signed URL,
+	 *   The URL will be valid for a specific time period.
+	 *
+	 */
 	
 	public String getPreSignedUrl(String object) throws IOException {
 
